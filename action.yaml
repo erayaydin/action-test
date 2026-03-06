@@ -8,7 +8,7 @@ inputs:
     description: 'Path to the sync config file (YAML) relative to source repo'
     required: true
   target_repo:
-    description: 'Target repository (owner/repo)'
+    description: 'Target repository name (e.g. "targetrepo"). Must be under the same owner as the source repo.'
     required: true
   target_branch:
     description: 'Branch name for the PR in target repo'
@@ -67,13 +67,13 @@ runs:
       with:
         app-id: ${{ inputs.app_id }}
         private-key: ${{ inputs.app_private_key }}
-        repositories: ${{ github.repository }},${{ inputs.target_repo }}
+        repositories: ${{ github.event.repository.name }},${{ inputs.target_repo }}
 
     - name: Checkout target repository
       uses: actions/checkout@v4
       with:
         token: ${{ steps.app-token.outputs.token || inputs.github_token }}
-        repository: ${{ inputs.target_repo }}
+        repository: ${{ github.repository_owner }}/${{ inputs.target_repo }}
         path: target
         persist-credentials: false
         fetch-depth: 0
@@ -117,5 +117,5 @@ runs:
           --source-repo "${{ github.repository }}" \
           --source-pr "${{ inputs.source_pr_number }}" \
           --source-pr-merged "${{ inputs.source_pr_merged }}" \
-          --target-repo "${{ inputs.target_repo }}" \
+          --target-repo "${{ github.repository_owner }}/${{ inputs.target_repo }}" \
           --target-pr "${{ steps.create_pr.outputs.pull-request-number }}"
