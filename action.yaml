@@ -82,7 +82,7 @@ runs:
       id: sync
       shell: bash
       run: |
-        node ${{ github.action_path }}/dist/index.js sync \
+        node ${{ github.action_path }}/dist/index.cjs sync \
           --config "${{ inputs.source_path }}/${{ inputs.config_path }}" \
           --source-root "${{ inputs.source_path }}" \
           --target-root "${{ inputs.target_path }}" \
@@ -108,7 +108,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
       run: |
-        node ${{ github.action_path }}/dist/index.js pr \
+        node ${{ github.action_path }}/dist/index.cjs pr \
           --source-repo "${{ inputs.source_repo }}" \
           --source-pr "${{ inputs.source_pr_number }}" \
           --source-pr-merged "${{ inputs.source_pr_merged }}" \
