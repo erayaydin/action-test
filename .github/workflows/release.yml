@@ -5,16 +5,39 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   release:
-    name: 'Build, test and release'
-    uses: fingerprintjs/dx-team-toolkit/.github/workflows/release-sdk-changesets.yml@v1
-    with:
-      appId: ${{ vars.APP_ID }}
-      runnerAppId: ${{ vars.RUNNER_APP_ID }}
-      language: node
-      language-version: '20'
-      prepare-command: pnpm build
-    secrets:
-      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
-      RUNNER_APP_PRIVATE_KEY: ${{ secrets.RUNNER_APP_PRIVATE_KEY }}
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: Create Release PR or Publish
+        uses: changesets/action@v1
+        with:
+          version: pnpm exec changeset version
+          publish: pnpm exec changeset publish
+          commit: 'chore(release): changeset created a new release'
+          title: 'Release [changeset]'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -46,6 +46,9 @@ importers:
       esbuild:
         specifier: ^0.25.0
         version: 0.25.12
+      eslint:
+        specifier: ^8.56.0
+        version: 8.56.0
       typescript:
         specifier: ^5.4.0
         version: 5.9.3
