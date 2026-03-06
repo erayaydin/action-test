@@ -1,0 +1,7 @@
+x-internal: true
+get:
+  summary: Internal usage metrics
+  operationId: getMetrics
+  responses:
+    '200':
+      description: OK

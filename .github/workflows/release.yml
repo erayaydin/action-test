@@ -1,0 +1,20 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: 'Build, test and release'
+    uses: fingerprintjs/dx-team-toolkit/.github/workflows/release-sdk-changesets.yml@v1
+    with:
+      appId: ${{ vars.APP_ID }}
+      runnerAppId: ${{ vars.RUNNER_APP_ID }}
+      language: node
+      language-version: '20'
+      prepare-command: pnpm build
+    secrets:
+      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+      RUNNER_APP_PRIVATE_KEY: ${{ secrets.RUNNER_APP_PRIVATE_KEY }}

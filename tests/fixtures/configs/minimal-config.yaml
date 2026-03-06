@@ -1,0 +1,10 @@
+entrypoint: api/v2/petstore-api.yaml
+
+file_mappings:
+  - source: api/v2/petstore-api.yaml
+    target: schemas/petstore-api.yaml
+
+internal:
+  file_marker: x-internal
+  strip_fields: []
+  exclude_patterns: []

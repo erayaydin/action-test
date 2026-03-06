@@ -1,0 +1,6 @@
+type: object
+properties:
+  score:
+    type: number
+  revision:
+    type: string

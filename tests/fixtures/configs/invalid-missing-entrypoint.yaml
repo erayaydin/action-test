@@ -1,0 +1,8 @@
+mode: multi_file
+
+file_mappings: []
+
+internal:
+  file_marker: x-internal
+  strip_fields: []
+  exclude_patterns: []

@@ -1,0 +1,9 @@
+entrypoint: api/v2/server-api.yaml
+mode: invalid_mode
+
+file_mappings: []
+
+internal:
+  file_marker: x-internal
+  strip_fields: []
+  exclude_patterns: []

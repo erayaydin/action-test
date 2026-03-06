@@ -1,0 +1,13 @@
+entrypoint: api/v1/petstore-api.yaml
+mode: bundled
+bundled_file: api/v1/dist/petstore-api.yaml
+
+file_mappings:
+  - source: api/v1/dist/petstore-api.yaml
+    target: schemas/petstore-api-bundled.yaml
+
+internal:
+  file_marker: x-internal
+  strip_fields:
+    - x-internal
+  exclude_patterns: []

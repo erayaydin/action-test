@@ -1,0 +1,11 @@
+entrypoint: api/v1/server-api.yaml
+mode: bundled
+
+file_mappings:
+  - source: api/v1/dist/server-api.yaml
+    target: schemas/fingerprint-server-api-for-sdks.yaml
+
+internal:
+  file_marker: x-internal
+  strip_fields: []
+  exclude_patterns: []

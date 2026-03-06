@@ -1,0 +1,8 @@
+{
+  "petId": "pet-123",
+  "breeds": {
+    "data": {
+      "breedName": "Golden Retriever"
+    }
+  }
+}

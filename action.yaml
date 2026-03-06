@@ -1,0 +1,116 @@
+name: OpenAPI Sync
+description: >
+  Sync OpenAPI schema files between repositories with internal content filtering.
+  Resolves $ref graph, strips x-internal content, creates a PR with meaningful changes only.
+
+inputs:
+  config_path:
+    description: 'Path to the sync config file (YAML) relative to source repo'
+    required: true
+  source_path:
+    description: 'Path to the source repo checkout'
+    required: false
+    default: '.'
+  target_repo:
+    description: 'Target repository (owner/repo)'
+    required: true
+  target_path:
+    description: 'Path to the target repo checkout'
+    required: false
+    default: 'target'
+  target_branch:
+    description: 'Branch name for the PR in target repo'
+    required: true
+  github_token:
+    description: 'GitHub token for target repo access and PR operations'
+    required: true
+  pr_title:
+    description: 'Pull Request title'
+    required: true
+    default: 'Sync OpenAPI Schema'
+  commit_message:
+    description: 'Commit message'
+    required: false
+    default: 'chore: sync OpenAPI schema'
+  labels:
+    description: 'Comma-separated PR labels'
+    required: false
+    default: ''
+  dry_run:
+    description: 'Only report diff, do not create PR'
+    required: false
+    default: 'false'
+  source_pr_number:
+    description: 'Source PR number (for commenting on source PR with target PR link)'
+    required: false
+  source_repo:
+    description: 'Source repository (owner/repo, for commenting on source PR)'
+    required: false
+  source_pr_merged:
+    description: 'Whether the source PR is already merged (true/false). If false, adds warning to target PR.'
+    required: false
+    default: 'true'
+
+outputs:
+  has_diff:
+    description: 'Whether meaningful changes were detected'
+    value: ${{ steps.sync.outputs.has_diff }}
+  diff_summary:
+    description: 'Human-readable summary of changes'
+    value: ${{ steps.sync.outputs.diff_summary }}
+  target_pr_number:
+    description: 'PR number created/updated in target repo'
+    value: ${{ steps.create_pr.outputs.pull-request-number }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout target repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ inputs.github_token }}
+        repository: ${{ inputs.target_repo }}
+        path: ${{ inputs.target_path }}
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Run OpenAPI Sync
+      id: sync
+      shell: bash
+      run: |
+        node ${{ github.action_path }}/dist/index.js sync \
+          --config "${{ inputs.source_path }}/${{ inputs.config_path }}" \
+          --source-root "${{ inputs.source_path }}" \
+          --target-root "${{ inputs.target_path }}" \
+          ${{ inputs.dry_run == 'true' && '--dry-run' || '' }}
+
+    - name: Create or Update Pull Request
+      id: create_pr
+      if: inputs.dry_run == 'false' && steps.sync.outputs.has_diff == 'true'
+      uses: peter-evans/create-pull-request@v6
+      with:
+        path: ${{ inputs.target_path }}
+        token: ${{ inputs.github_token }}
+        commit-message: ${{ inputs.commit_message }}
+        title: ${{ inputs.pr_title }}
+        body: ${{ steps.sync.outputs.pr_body }}
+        branch: ${{ inputs.target_branch }}
+        delete-branch: true
+        labels: ${{ inputs.labels }}
+
+    - name: PR lifecycle actions
+      if: inputs.dry_run == 'false' && steps.sync.outputs.has_diff == 'true' && inputs.source_pr_number != ''
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        node ${{ github.action_path }}/dist/index.js pr \
+          --source-repo "${{ inputs.source_repo }}" \
+          --source-pr "${{ inputs.source_pr_number }}" \
+          --source-pr-merged "${{ inputs.source_pr_merged }}" \
+          --target-repo "${{ inputs.target_repo }}" \
+          --target-pr "${{ steps.create_pr.outputs.pull-request-number }}"

@@ -1,0 +1,9 @@
+type: object
+properties:
+  data:
+    type: object
+    properties:
+      breedName:
+        type: string
+      confidence:
+        $ref: './BreedConfidence.yaml'

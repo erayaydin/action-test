@@ -1,0 +1,17 @@
+type: object
+properties:
+  id:
+    type: string
+  name:
+    type: string
+  internal_debug:
+    type: object
+    x-internal: true
+    properties:
+      trace_id:
+        type: string
+  internalRef:
+    $ref: './health/Internal.yaml'
+    x-internal: true
+  encryptedData:
+    $ref: './health/EncryptedRecord.yaml'

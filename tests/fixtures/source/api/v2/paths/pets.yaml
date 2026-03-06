@@ -1,0 +1,30 @@
+get:
+  summary: List pets
+  operationId: listPets
+  parameters:
+    - name: limit
+      in: query
+      schema:
+        type: integer
+    - name: debug_token
+      in: query
+      x-internal: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Pet.yaml'
+          examples:
+            default:
+              $ref: './examples/pets/get_pet_200.json'
+post:
+  summary: Create pet
+  operationId: createPet
+  x-internal: true
+  responses:
+    '201':
+      description: Created

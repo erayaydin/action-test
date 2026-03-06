@@ -1,0 +1,10 @@
+entrypoint: api/server-api.yaml
+mode: multi_file
+file_mappings:
+  - source_dir: api
+    target_dir: 789
+internal:
+  file_marker: x-internal
+  strip_fields:
+    - x-internal
+  exclude_patterns: []

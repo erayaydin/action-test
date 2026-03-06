@@ -1,0 +1,7 @@
+x-internal: true
+type: object
+properties:
+  encrypted:
+    type: string
+  key:
+    type: string

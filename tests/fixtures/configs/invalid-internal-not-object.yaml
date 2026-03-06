@@ -1,0 +1,6 @@
+entrypoint: api/server-api.yaml
+mode: multi_file
+file_mappings:
+  - source: api.yaml
+    target: out.yaml
+internal: "not an object"

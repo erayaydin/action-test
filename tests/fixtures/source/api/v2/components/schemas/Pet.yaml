@@ -1,0 +1,10 @@
+type: object
+properties:
+  name:
+    type: string
+  breed:
+    $ref: './breeds/Breed.yaml'
+  vaccination:
+    $ref: './vaccinations/Vaccination.yaml'
+  microchip:
+    $ref: './health/Microchip.yaml'
