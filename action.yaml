@@ -71,6 +71,7 @@ runs:
         token: ${{ inputs.github_token }}
         repository: ${{ inputs.target_repo }}
         path: ${{ inputs.target_path }}
+        persist-credentials: false
         fetch-depth: 0
 
     - name: Setup Node.js
