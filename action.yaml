@@ -67,7 +67,7 @@ runs:
       with:
         app-id: ${{ inputs.app_id }}
         private-key: ${{ inputs.app_private_key }}
-        repositories: ${{ github.event.repository.name }},${{ inputs.target_repo }}
+        repositories: ${{ github.repository }},${{ inputs.target_repo }}
 
     - name: Checkout target repository
       uses: actions/checkout@v4
