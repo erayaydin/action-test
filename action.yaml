@@ -7,23 +7,21 @@ inputs:
   config_path:
     description: 'Path to the sync config file (YAML) relative to source repo'
     required: true
-  source_path:
-    description: 'Path to the source repo checkout'
-    required: false
-    default: '.'
   target_repo:
     description: 'Target repository (owner/repo)'
     required: true
-  target_path:
-    description: 'Path to the target repo checkout'
-    required: false
-    default: 'target'
   target_branch:
     description: 'Branch name for the PR in target repo'
     required: true
   github_token:
-    description: 'GitHub token for target repo access and PR operations'
-    required: true
+    description: 'GitHub token for target repo access and PR operations. Not needed if app_id and app_private_key are provided.'
+    required: false
+  app_id:
+    description: 'GitHub App ID for generating a token'
+    required: false
+  app_private_key:
+    description: 'GitHub App private key for generating a token'
+    required: false
   pr_title:
     description: 'Pull Request title'
     required: true
@@ -42,9 +40,6 @@ inputs:
     default: 'false'
   source_pr_number:
     description: 'Source PR number (for commenting on source PR with target PR link)'
-    required: false
-  source_repo:
-    description: 'Source repository (owner/repo, for commenting on source PR)'
     required: false
   source_pr_merged:
     description: 'Whether the source PR is already merged (true/false). If false, adds warning to target PR.'
@@ -65,12 +60,21 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - name: Generate token from GitHub App
+      id: app-token
+      if: inputs.app_id != '' && inputs.app_private_key != ''
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ inputs.app_id }}
+        private-key: ${{ inputs.app_private_key }}
+        repositories: ${{ github.event.repository.name }},${{ inputs.target_repo }}
+
     - name: Checkout target repository
       uses: actions/checkout@v4
       with:
-        token: ${{ inputs.github_token }}
+        token: ${{ steps.app-token.outputs.token || inputs.github_token }}
         repository: ${{ inputs.target_repo }}
-        path: ${{ inputs.target_path }}
+        path: target
         persist-credentials: false
         fetch-depth: 0
 
@@ -84,9 +88,9 @@ runs:
       shell: bash
       run: |
         node ${{ github.action_path }}/dist/index.cjs sync \
-          --config "${{ inputs.source_path }}/${{ inputs.config_path }}" \
-          --source-root "${{ inputs.source_path }}" \
-          --target-root "${{ inputs.target_path }}" \
+          --config "source/${{ inputs.config_path }}" \
+          --source-root "source" \
+          --target-root "target" \
           ${{ inputs.dry_run == 'true' && '--dry-run' || '' }}
 
     - name: Create or Update Pull Request
@@ -94,8 +98,8 @@ runs:
       if: inputs.dry_run == 'false' && steps.sync.outputs.has_diff == 'true'
       uses: peter-evans/create-pull-request@v6
       with:
-        path: ${{ inputs.target_path }}
-        token: ${{ inputs.github_token }}
+        path: target
+        token: ${{ steps.app-token.outputs.token || inputs.github_token }}
         commit-message: ${{ inputs.commit_message }}
         title: ${{ inputs.pr_title }}
         body: ${{ steps.sync.outputs.pr_body }}
@@ -107,10 +111,10 @@ runs:
       if: inputs.dry_run == 'false' && steps.sync.outputs.has_diff == 'true' && inputs.source_pr_number != ''
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GITHUB_TOKEN: ${{ steps.app-token.outputs.token || inputs.github_token }}
       run: |
         node ${{ github.action_path }}/dist/index.cjs pr \
-          --source-repo "${{ inputs.source_repo }}" \
+          --source-repo "${{ github.repository }}" \
           --source-pr "${{ inputs.source_pr_number }}" \
           --source-pr-merged "${{ inputs.source_pr_merged }}" \
           --target-repo "${{ inputs.target_repo }}" \
