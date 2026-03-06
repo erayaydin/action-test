@@ -60,9 +60,9 @@ describe('handlePrLifecycle', () => {
       { status: 201 },
       // DELETE label on target PR (source merged → remove warning label)
       { status: 404 },
-      // GET comments on target PR (find merged comment) → none
+      // GET comments on target PR (find status comment) → none
       { status: 200, body: [] },
-      // POST merged comment on target PR
+      // POST status comment on target PR
       { status: 201 },
     ])
 
@@ -92,7 +92,7 @@ describe('handlePrLifecycle', () => {
       { status: 404 },
       // GET comments on target PR
       { status: 200, body: [] },
-      // POST merged comment
+      // POST status comment
       { status: 201 },
     ])
 
@@ -114,7 +114,7 @@ describe('handlePrLifecycle', () => {
       { status: 200 },
       // GET comments on target PR → none
       { status: 200, body: [] },
-      // POST warning comment on target PR
+      // POST status comment on target PR
       { status: 201 },
     ])
 
@@ -127,9 +127,9 @@ describe('handlePrLifecycle', () => {
     const labelBody = getFetchCallBody(2)
     expect(labelBody.labels).toEqual(['Source PR Not Merged'])
 
-    // Fifth call: post warning comment
+    // Fifth call: post status comment
     const commentBody = getFetchCallBody(4)
-    expect(commentBody.body).toContain('<!-- openapi-sync-warning -->')
+    expect(commentBody.body).toContain('<!-- openapi-sync-status -->')
     expect(commentBody.body).toContain('not finalized yet')
   })
 
@@ -143,7 +143,7 @@ describe('handlePrLifecycle', () => {
       { status: 200 },
       // GET comments on target PR
       { status: 200, body: [] },
-      // POST merged comment
+      // POST status comment
       { status: 201 },
     ])
 
@@ -154,9 +154,9 @@ describe('handlePrLifecycle', () => {
     expect(fetchMock.mock.calls[2][0]).toContain('/repos/owner/target/issues/99/labels/Source%20PR%20Not%20Merged')
     expect(fetchMock.mock.calls[2][1]?.method).toBe('DELETE')
 
-    // Fifth call: merged comment
+    // Fifth call: status comment
     const commentBody = getFetchCallBody(4)
-    expect(commentBody.body).toContain('<!-- openapi-sync-merged -->')
+    expect(commentBody.body).toContain('<!-- openapi-sync-status -->')
     expect(commentBody.body).toContain('have been finalized')
     expect(commentBody.body).toContain('ready for review')
   })
@@ -171,7 +171,7 @@ describe('handlePrLifecycle', () => {
       { status: 404 },
       // GET comments on target PR
       { status: 200, body: [] },
-      // POST merged comment
+      // POST status comment
       { status: 201 },
     ])
 
@@ -190,7 +190,7 @@ describe('handlePrLifecycle', () => {
       { status: 404 },
       // GET comments on target PR
       { status: 200, body: [] },
-      // POST merged comment fails too
+      // POST status comment fails too
       { status: 500 },
     ])
 
@@ -209,7 +209,7 @@ describe('handlePrLifecycle', () => {
       { status: 404 },
       // GET comments on target PR
       { status: 200, body: [] },
-      // POST merged comment
+      // POST status comment
       { status: 201 },
     ])
 
@@ -228,7 +228,7 @@ describe('handlePrLifecycle', () => {
       { status: 403 },
       // GET target comments
       { status: 200, body: [] },
-      // POST warning comment
+      // POST status comment
       { status: 201 },
     ])
 
@@ -247,7 +247,7 @@ describe('handlePrLifecycle', () => {
       { status: 500 },
       // GET target comments
       { status: 200, body: [] },
-      // POST merged comment
+      // POST status comment
       { status: 201 },
     ])
 
@@ -266,7 +266,7 @@ describe('handlePrLifecycle', () => {
       { status: 404 },
       // GET target comments
       { status: 200, body: [] },
-      // POST merged comment
+      // POST status comment
       { status: 201 },
     ])
 
@@ -279,7 +279,7 @@ describe('handlePrLifecycle', () => {
     expect(labelWarnings).toHaveLength(0)
   })
 
-  it('updates existing warning comment instead of creating duplicate', async () => {
+  it('updates existing status comment instead of creating duplicate', async () => {
     mockFetch([
       // GET source comments
       { status: 200, body: [] },
@@ -287,12 +287,12 @@ describe('handlePrLifecycle', () => {
       { status: 201 },
       // POST label
       { status: 200 },
-      // GET target comments → existing warning
+      // GET target comments → existing status comment
       {
         status: 200,
-        body: [{ id: 888, body: '<!-- openapi-sync-warning -->\nOld warning' }],
+        body: [{ id: 888, body: '<!-- openapi-sync-status -->\nOld status' }],
       },
-      // PATCH warning comment
+      // PATCH status comment
       { status: 200 },
     ])
 
@@ -313,7 +313,7 @@ describe('handlePrLifecycle', () => {
       { status: 404 },
       // GET target comments also non-array
       { status: 200, body: 'not-an-array' },
-      // POST merged comment
+      // POST status comment
       { status: 201 },
     ])
 

@@ -1,6 +1,5 @@
 const COMMENT_TAG_LINK = '<!-- openapi-sync-link -->'
-const COMMENT_TAG_WARNING = '<!-- openapi-sync-warning -->'
-const COMMENT_TAG_MERGED = '<!-- openapi-sync-merged -->'
+const COMMENT_TAG_STATUS = '<!-- openapi-sync-status -->'
 const WARNING_LABEL = 'Source PR Not Merged'
 
 export interface PrOptions {
@@ -108,12 +107,12 @@ export async function handlePrLifecycle(options: PrOptions): Promise<void> {
   if (!sourcePrMerged) {
     await addLabel(targetRepo, targetPrNumber, WARNING_LABEL, githubToken)
 
-    const warningBody = `${COMMENT_TAG_WARNING}\n⚠️ The source changes are not finalized yet. Do not merge this PR until the source changes are ready.`
-    await upsertComment(targetRepo, targetPrNumber, COMMENT_TAG_WARNING, warningBody, githubToken)
+    const statusBody = `${COMMENT_TAG_STATUS}\n⚠️ The source changes are not finalized yet. Do not merge this PR until the source changes are ready.`
+    await upsertComment(targetRepo, targetPrNumber, COMMENT_TAG_STATUS, statusBody, githubToken)
   } else {
     await removeLabel(targetRepo, targetPrNumber, WARNING_LABEL, githubToken)
 
-    const mergedBody = `${COMMENT_TAG_MERGED}\n✅ The source changes have been finalized. This PR is ready for review.`
-    await upsertComment(targetRepo, targetPrNumber, COMMENT_TAG_MERGED, mergedBody, githubToken)
+    const statusBody = `${COMMENT_TAG_STATUS}\n✅ The source changes have been finalized. This PR is ready for review.`
+    await upsertComment(targetRepo, targetPrNumber, COMMENT_TAG_STATUS, statusBody, githubToken)
   }
 }
